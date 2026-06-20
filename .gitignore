@@ -1,0 +1,9 @@
+.env
+Neo4j-Aura-Instance.txt
+PLAN.md
+.vscode/
+__pycache__/
+data/case_documents/*
+data/processed/*
+notebooks
+sample_prompts.txt
