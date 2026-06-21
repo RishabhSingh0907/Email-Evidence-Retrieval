@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, Tuple, Any, List
 from openai import OpenAI
 from dotenv import load_dotenv
+from app import ROOT
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -34,9 +35,10 @@ MODEL_NAME = "gpt-4o"
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # === FILE PATHS ===
-INPUT_DIR = Path("data\\processed\\parsed_emails")
-REFERENCE_DICT_PATH = Path("data\\processed\\entity_hints\\canonical_reference_dict.json")
-OUTPUT_DIR = Path("data\\processed\\canonicalized_features")
+ROOT_DIR = Path.cwd().parent.parent
+INPUT_DIR = ROOT_DIR / "data" / "processed" / "parsed_emails"
+REFERENCE_DICT_PATH = ROOT_DIR / "data" / "processed" / "entity_hints" / "canonical_reference_dict.json"
+OUTPUT_DIR = ROOT_DIR / "data" / "processed" / "canonicalized_features"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # === Utilities: load/save reference dict ===

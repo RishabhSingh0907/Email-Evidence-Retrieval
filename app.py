@@ -53,7 +53,7 @@ from neo4j_graphrag.retrievers import (                           # noqa: E402
 )
 
 from src.data_processing.embedding_model import EmbeddingModel                        # noqa: E402
-from src.utils.response_formatter import (                                  # noqa: E402
+from src.chat.response_formatter import (                                  # noqa: E402
     ResponseFormatter,
     EmailRecord,
     CitationBlock,

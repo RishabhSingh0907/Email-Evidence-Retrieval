@@ -9,8 +9,10 @@ import json
 from pathlib import Path
 
 # --- CONFIG ---
-PDF_FOLDER = "Case_Doc"
-PARSED_OUTPUT_DIR = "./data/parsed_emails"
+
+ROOT_DIR = Path(__file__).parent.parent
+PDF_FOLDER = ROOT_DIR / "data" / "case_documents"  # Adjust this path as needed
+PARSED_OUTPUT_DIR = ROOT_DIR / "data" / "processed" / "parsed_emails"
 
 # --- UTILITIES ---
 def extract_text_from_pdf(pdf_path: str) -> str:

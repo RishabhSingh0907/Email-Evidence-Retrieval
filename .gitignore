@@ -5,5 +5,13 @@ PLAN.md
 __pycache__/
 data/case_documents/*
 data/processed/*
-notebooks
+notebook.ipynb
+src/config/__pycache__/
+src/agents/__pycache__/
+src/chat/__pycache__/
+src/data_processing/__pycache__/
+src/data_load/__pycache__/
+src/graph/__pycache__/
+src/tools/__pycache__/
+
 sample_prompts.txt

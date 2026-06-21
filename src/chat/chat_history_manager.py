@@ -1,48 +1,72 @@
+"""
+src/chats/history.py
+---------------------
+Session state and chat history management for the LangGraph agent.
 
-import json
-from pathlib import Path
-from datetime import datetime
+LangGraph's create_react_agent accepts a `checkpointer` that persists
+MessagesState across invocations.  We use MemorySaver (in-process, free)
+which keeps history for the lifetime of the Streamlit server process.
 
-CHAT_HISTORY_DIR = Path("./data/chat_history")
-CHAT_HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+Each browser tab / user gets its own thread_id from Streamlit's session_state,
+so conversations don't bleed across sessions.
 
+Thread ID format: "email_agent_{session_id}"
+  - session_id is generated once per Streamlit session and stored in
+    st.session_state so it survives reruns but resets on page refresh.
 
-def _get_chat_file(session_id: str) -> Path:
-    return CHAT_HISTORY_DIR / f"{session_id}.json"
+If you want persistent history across server restarts, swap MemorySaver
+for SqliteSaver (pip install langgraph-checkpoint-sqlite) — the interface
+is identical.
 
+Usage:
+    from chats.history import checkpointer, get_thread_config
 
-def save_user_message(session_id: str, message: str):
-    _append_message(session_id, "user", message)
+    agent = create_react_agent(..., checkpointer=checkpointer)
+    config = get_thread_config()           # call inside Streamlit context
+    result = agent.invoke({"messages": [...]}, config=config)
+"""
 
+from __future__ import annotations
 
-def save_agent_response(session_id: str, message: str):
-    _append_message(session_id, "agent", message)
+import uuid
+import logging
+import streamlit as st
+from langgraph.checkpoint.memory import MemorySaver
 
+logger = logging.getLogger(__name__)
 
-def _append_message(session_id: str, role: str, content: str):
-    entry = {
-        "role": role,
-        "content": content,
-        "timestamp": datetime.now().isoformat()
-    }
-    file = _get_chat_file(session_id)
-    history = []
-    if file.exists():
-        with open(file, "r", encoding="utf-8") as f:
-            history = json.load(f)
-
-    history.append(entry)
-    with open(file, "w", encoding="utf-8") as f:
-        json.dump(history, f, indent=2)
-
-
-def get_chat_history(session_id: str):
-    file = _get_chat_file(session_id)
-    if not file.exists():
-        return []
-    with open(file, "r", encoding="utf-8") as f:
-        return json.load(f)
+# Module-level MemorySaver shared across all sessions in this process
+checkpointer = MemorySaver()
 
 
-def list_all_sessions():
-    return [f.stem for f in CHAT_HISTORY_DIR.glob("*.json") if f.is_file()]
+def get_session_id() -> str:
+    """
+    Returns a stable session ID for the current Streamlit browser session.
+    Generated once on first call and stored in st.session_state.
+    """
+    if "agent_session_id" not in st.session_state:
+        st.session_state["agent_session_id"] = str(uuid.uuid4())[:8]
+        logger.info("New session: %s", st.session_state["agent_session_id"])
+    return st.session_state["agent_session_id"]
+
+
+def get_thread_config() -> dict:
+    """
+    Returns the LangGraph config dict for the current session.
+    Pass this as `config` to agent.invoke() so history is scoped per session.
+    """
+    session_id = get_session_id()
+    thread_id  = f"email_agent_{session_id}"
+    return {"configurable": {"thread_id": thread_id}}
+
+
+def clear_session_history() -> None:
+    """
+    Resets the current session's conversation history.
+    Call on 'Clear chat' button press.
+    """
+    if "agent_session_id" in st.session_state:
+        old = st.session_state.pop("agent_session_id")
+        logger.info("History cleared for session %s", old)
+    # Force a new session_id on next get_session_id() call
+    st.session_state.pop("agent_session_id", None)
