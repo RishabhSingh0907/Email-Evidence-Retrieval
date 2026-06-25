@@ -5,39 +5,34 @@
 ```
 Agentic_RAG/
 ├── src/                          # Source code
-│   ├── data_ingestion/           # Stage 1: Extract from raw sources
-│   │   └── email_parser_pipeline.py
+│   ├── data_ingest/           # Stage 1: Extract from raw sources
+│   │   └── neo4j_ingestor.py
 │   ├── data_processing/          # Stage 2: LLM feature extraction
 │   │   └── llm_extractor.py
-│   ├── data_loading/             # Stage 3: Load into databases
-│   │   └── neo4j_ingestor.py
+│   │   └── embedding_model.py
+│   ├── data_load/             # Stage 3: Load into databases
+│   │   └── email_parser_pipeline.py
 │   ├── agents/                   # Stage 4: Agent orchestration
-│   │   ├── llm_agent_backend.py
-│   │   └── rag_agent_backend.py
-│   ├── llm/                      # LLM interactions
-│   │   └── LLM_canonical_wrapper.py
+│   │   ├── agent.py
+│   │   └── graph.py
+|   |   └── llm.py
 │   ├── graph/                    # Neo4j graph operations
-│   ├── vector_store/             # Vector embeddings & search
+│   │   └── graph_schema_visualization.py
 │   ├── chat/                     # Chat history management
+│   │   └── app.py
 │   │   └── chat_history_manager.py
-│   ├── utils/                    # Shared utilities
-│   └── config/                   # Configuration & constants
-│       ├── canonical_feature.py
-│       └── sample_prompts.txt
+│   │   └── response_formatter.py
+│   ├── tools/                    # Shared utilities
+│   │   └── cypher_tools.py
+│   │   └── semantic_tool.py
+│   │   └── text2cypher_tool.py
 ├── data/
 │   ├── raw/                      # Raw input data
 │   │   ├── case_documents/       # Original case documents
-│   │   └── new_data/             # Additional raw data
 │   ├── processed/                # Intermediate processed data
-│   └── vectors/                  # Vector embeddings
-├── notebooks/                    # Jupyter notebooks for development
-│   └── main.ipynb
-├── tests/                        # Unit & integration tests
-├── logs/                         # Application logs
-├── docs/                         # Documentation
 ├── app.py                        # Main application entry point
 ├── requirements.txt              # Python dependencies
-├── .env                          # Environment variables (keys, credentials)
+├── pipeline.py                          # pipeline for ingestion and loading data into database
 └── README.md                     # Project documentation
 ```
 
@@ -115,29 +110,6 @@ Agentic_RAG/
 - 🔍 **Semantic Search**: Vector embeddings for efficient retrieval
 - 💬 **Conversational Agent**: Chat interface with context awareness
 - 📈 **Logging**: Comprehensive logging for debugging and monitoring
-
-## Testing
-
-```bash
-pytest tests/
-pytest --cov=src tests/  # With coverage
-```
-
-## Documentation
-
-See `docs/` directory for detailed documentation on:
-- Architecture overview
-- Module specifications
-- API reference
-- Configuration guide
-
-## TODO / Next Steps
-
-1. Complete vector store implementation
-2. Add advanced graph query capabilities
-3. Implement semantic caching
-4. Add multi-agent coordination
-5. Performance optimization
 
 ## License
 
